@@ -1,0 +1,12 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/rydevs29/PurePermsScore-PM5
+build-by-default: true
+branches:
+- master
+- PM5
+projects:
+  PurePermsScore-PM5:
+    libs:
+      - src: Ifera/PurePermsScore
+        version: ^2.0.0
+        branch: master
+...
