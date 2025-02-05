@@ -1,0 +1,11 @@
+---
+name: PurePermsScore-PM5
+main: Ifera\PurePermsScore\Main
+api: 5.16.0
+version: 2.0.0
+author: Ifera, rydevs
+description: A plugin implementing some basic tags for ScoreHud.
+depend:
+- ScoreHud
+- PurePerms
+...
