@@ -8,7 +8,6 @@ use Ifera\PurePermsScore\listeners\EventListener;
 use Ifera\PurePermsScore\listeners\TagResolveListener;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
-use pocketmine\plugin\PluginManager;
 
 class Main extends PluginBase {
 
@@ -17,13 +16,18 @@ class Main extends PluginBase {
     protected function onEnable(): void {
         $pluginManager = $this->getServer()->getPluginManager();
 
-        // Cek apakah PurePerms tersedia
-        $this->purePerms = $pluginManager->getPlugin("PurePerms");
-        if (!$this->purePerms instanceof PurePerms) {
+        // 1. Simpan ke variabel lokal dulu (tipe: Plugin|null)
+        $plugin = $pluginManager->getPlugin("PurePerms");
+
+        // 2. Cek apakah plugin tersebut ADA dan merupakan INSTANCE dari PurePerms
+        if (!$plugin instanceof PurePerms) {
             $this->getLogger()->error("PurePerms tidak ditemukan! Plugin akan dinonaktifkan.");
-            $this->getServer()->getPluginManager()->disablePlugin($this);
+            $pluginManager->disablePlugin($this); // Koreksi: Gunakan variable $pluginManager yang sudah ada
             return;
         }
+
+        // 3. Sekarang aman untuk di-assign karena PHPStan tahu $plugin pasti PurePerms
+        $this->purePerms = $plugin;
 
         // Registrasi event listener
         $pluginManager->registerEvents(new EventListener($this), $this);
@@ -31,16 +35,23 @@ class Main extends PluginBase {
     }
 
     public function getPlayerRank(Player $player): string {
+        // Tambahkan pengecekan null safety jaga-jaga jika PurePerms error
+        if ($this->purePerms === null) return "No Rank";
+        
         $group = $this->purePerms->getUserDataMgr()->getGroup($player);
         return $group !== null ? $group->getName() : "No Rank";
     }
 
     public function getPrefix(Player $player): string {
+        if ($this->purePerms === null) return "";
+
         $prefix = $this->purePerms->getUserDataMgr()->getNode($player, "prefix");
         return (!empty($prefix)) ? (string) $prefix : "No Prefix";
     }
 
     public function getSuffix(Player $player): string {
+        if ($this->purePerms === null) return "";
+
         $suffix = $this->purePerms->getUserDataMgr()->getNode($player, "suffix");
         return (!empty($suffix)) ? (string) $suffix : "No Suffix";
     }
