@@ -22,7 +22,6 @@ class EventListener implements Listener {
 
     public function onJoin(PlayerJoinEvent $event): void {
         $player = $event->getPlayer();
-        // Cek dasar, meski biasanya di onJoin player pasti online
         if (!$player->isOnline()) {
             return;
         }
@@ -34,8 +33,9 @@ class EventListener implements Listener {
      * @phpstan-ignore-next-line
      */
     public function onGroupChange(PPGroupChangedEvent $event): void {
-        // Method getPlayer() di PurePerms mungkin mengembalikan IPlayer/OfflinePlayer
-        // Jadi kita harus memastikan itu adalah Player online
+        // ERROR SEBELUMNYA DI SINI (Line 39)
+        // Kita tambahkan ignore lagi karena PHPStan menganggap method ini tidak exist pada unknown class
+        /** @phpstan-ignore-next-line */
         $player = $event->getPlayer();
         
         if (!$player instanceof Player || !$player->isOnline()) {
@@ -44,13 +44,13 @@ class EventListener implements Listener {
         $this->sendUpdate($player);
     }
 
-    // Mendeteksi perubahan prefix/suffix melalui chat
+    // Mendeteksi perubahan prefix/suffix melalui chat sebagai solusi sementara
     public function onPlayerChat(PlayerChatEvent $event): void {
         $this->sendUpdate($event->getPlayer());
     }
 
     private function sendUpdate(Player $player): void {
-        // Pastikan ScoreHud terinstall agar class ini ada
+        // Cek apakah class ScoreHud ada untuk mencegah crash
         if (class_exists(PlayerTagsUpdateEvent::class) && class_exists(ScoreTag::class)) {
             (new PlayerTagsUpdateEvent($player, [
                 new ScoreTag("ppscore.rank", $this->plugin->getPlayerRank($player)),
